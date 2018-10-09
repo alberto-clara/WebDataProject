@@ -1,0 +1,42 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry} 
+\usepackage[T1]{fontenc}
+
+\title{CS483 Project Proposal Template\\
+\large Team Name Here}
+
+\author{
+  LastName1, FirstName1\      \texttt{youremailhere}
+  \and
+  LastName2, FirstName2\      \texttt{youremailhere}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Put a general summary of your project here. Highlight how you envision users querying the data and what type of answers they will get back. Summarize your features here. All sources should be cited using IEEE Transactions style with BibTex. You can easily find BibTex formatted citations on Google Scholar or other journal websites, like so \cite{amer2000optimizing}. Here is another example \cite{antoshenkov1995byte}.
+
+\section{Database Summary}
+Put the type of data you are storing here. This includes the attribute types, such as images, links etc. The best way to do this would be to outline your schema, but other ways are acceptable. Also add the total number of tuples you have in your database and, if possible, the physical size of the database.
+
+\section{Indexing}
+Outline what portions of the database you plan to allow the user to search. Can they search for images or are those merely a byproduct of searching other attributes? Are you performing any stemming and stopping before you index? Are you allowing the user to search the stemmed and stopped and will you display the stemmed and stopped data or are you storing both and just displaying the original. Justify each design decision.
+
+\section{Features}
+Summarize your features and how they will improve the user experience or the search engine.
+
+\subsection{Feature 1}
+Specific details of your feature and how you plan to implement. Be sure to cite any papers or website you will be using. If you are using a specific method, such as PageRank, then include the original papers in your citations and a summary of how it works.
+
+\subsection{Feature 2}
+Same content as feature 1, but based on feature 2.
+
+\section{Member Responsibilities}
+Sharing responsibilities is fine, but be sure to specify what ones each member is working on. Just because a member is given a certain task, does not mean that the team cannot assist them either. It is mostly a guideline for who will be presenting and answering questions about a given topic. The general goal is to evenly divide the workload between all group members. What I \textbf{do not} want to see is that one group member did not participate because they promised to just work on the slides and the paper. 
+
+\bibliographystyle{ieeetr}
+\bibliography{bib.bib}
+\end{document}

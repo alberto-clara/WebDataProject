@@ -1,0 +1,11 @@
+\begin{thebibliography}{1}
+
+\bibitem{amer2000optimizing}
+S.~Amer-Yahia and T.~Johnson, ``Optimizing queries on compressed bitmaps.,'' in
+  {\em VLDB}, pp.~329--338, Citeseer, 2000.
+
+\bibitem{antoshenkov1995byte}
+G.~Antoshenkov, ``Byte-aligned bitmap compression,'' in {\em Data Compression
+  Conference, 1995. DCC'95. Proceedings}, p.~476, IEEE, 1995.
+
+\end{thebibliography}
