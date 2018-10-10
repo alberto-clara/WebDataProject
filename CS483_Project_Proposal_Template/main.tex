@@ -1,42 +1,77 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry} 
 \usepackage[T1]{fontenc}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
 
 \title{CS483 Project Proposal Template\\
-\large Team Name Here}
+\large Team One}
 
 \author{
-  LastName1, FirstName1\      \texttt{youremailhere}
+  Clara, Alberto      \texttt{alberto.clara@wsu.edu}
   \and
-  LastName2, FirstName2\      \texttt{youremailhere}
+  AlSarhi, Saeed      \texttt{saeed.alsarhi@wsu.edu}
+  \and
+  Wellington, Patrick      \texttt{patrick.wellington@wsu.edu}
+  \and
+  Young, Justin      \texttt{justin.young@wsu.edu}
 }
-\date{}
+\date{10/10/2018}
 
 \begin{document}
 
 \maketitle
 
 \section{Introduction}
-Put a general summary of your project here. Highlight how you envision users querying the data and what type of answers they will get back. Summarize your features here. All sources should be cited using IEEE Transactions style with BibTex. You can easily find BibTex formatted citations on Google Scholar or other journal websites, like so \cite{amer2000optimizing}. Here is another example \cite{antoshenkov1995byte}.
+Our project will be creating a search engine  using Whoosh over the scraped data-set from Wikipedia website. The data-set is about sci-fi movies from 1920 to present. We will index the queries on a large CSV file containing the scraped data. The engine will allow search on all attributes of the data-set. For example: search films based on names of actors/actresses (if I type Harrison Ford, the engine should return all the movies Harrison Ford participated), or producers or writers, etc.  Most of the fields are going to be of type TEXT that's where Whoosh is great at searching. One of the field in the data-set is the 'plot' which contains free-form text up to 2000 characters. The TEXT fields are also great to incorporate advanced searching features such as ranking, stemming, n-grams, etc.  There are two fields release data and running time that are non-text can be used for searching by date range and number values. As far as ranking algorithm goes, we will use TF-IDF for the plot search, it will return at most the top 10 tuples for each search.
 
 \section{Database Summary}
-Put the type of data you are storing here. This includes the attribute types, such as images, links etc. The best way to do this would be to outline your schema, but other ways are acceptable. Also add the total number of tuples you have in your database and, if possible, the physical size of the database.
+Sci-Fi Movie(name, plot, director, producer, screenplay, writer, starring, music, cinematography, editing studio, distributor, released runtime, country, language)
+\newline
+\text{
+Total of 1500 tuples. \newline
+schema = Schema( \newline
+\tab name=ID(stored=True), \newline
+\tab plot=TEXT(stored=True), \newline
+\tab director=TEXT(stored=True), \newline
+\tab producer=TEXT(stored=True), \newline
+\tab screenplay=TEXT(stored=True), \newline
+\tab writer=TEXT(stored=True), \newline
+\tab starring=TEXT(stored=True), \newline
+\tab music=TEXT(stored=True), \newline
+\tab cinematography=TEXT(stored=True), \newline
+\tab editing=TEXT(stored=True), \newline
+\tab studio=TEXT(stored=True), \newline
+\tab distributor=TEXT(stored=True), \newline
+\tab released=DATETIME(stored=True, sortable=True), \newline
+\tab runtime=NUMERIC(int, 16, decimalplaces=0, signed=False, sortable=True, default=0), \newline
+\tab country=TEXT(stored=True), \newline
+\tab language=TEXT(stored=True) \newline
+)
+}
+
+
 
 \section{Indexing}
-Outline what portions of the database you plan to allow the user to search. Can they search for images or are those merely a byproduct of searching other attributes? Are you performing any stemming and stopping before you index? Are you allowing the user to search the stemmed and stopped and will you display the stemmed and stopped data or are you storing both and just displaying the original. Justify each design decision.
+The fields that the database will allow the user to search are name, plot, director, producer, writer, and starring actors. The only field that will be stemmed or stopped is the plot field, because everything else being indexed is a name and there is nothing to stem or stop in a name and it is important to preserve the exact information represented in a name. The stemmed and stopped plot data will be stored in an inverted index for use in TF-IDF, and the original data will be stored to be displayed in search results.
 
 \section{Features}
-Summarize your features and how they will improve the user experience or the search engine.
-
 \subsection{Feature 1}
-Specific details of your feature and how you plan to implement. Be sure to cite any papers or website you will be using. If you are using a specific method, such as PageRank, then include the original papers in your citations and a summary of how it works.
+Suggestions based on the users search would be our first feature. So based on the users search we can suggest movies that have the same director, actors, or writer(s) as the top results.
 
 \subsection{Feature 2}
-Same content as feature 1, but based on feature 2.
+Have the option to sort the search result per ratings. The result will first be unsorted but the user will have the option to turn this feature on/off. This way the user can get to choose a movie with a good rating based on his search.
 
 \section{Member Responsibilities}
-Sharing responsibilities is fine, but be sure to specify what ones each member is working on. Just because a member is given a certain task, does not mean that the team cannot assist them either. It is mostly a guideline for who will be presenting and answering questions about a given topic. The general goal is to evenly divide the workload between all group members. What I \textbf{do not} want to see is that one group member did not participate because they promised to just work on the slides and the paper. 
+\textbf{Member responsibility} \newline
+\textbf{Final project proposal:} everyone \newline
+\textbf{Progress report:} Alberto, Saeed, Justin \newline
+\textbf{Search engine code developer:} everyone \newline
+\textbf{Tester:} everyone \newline
+\textbf{Slides:} Alberto, Saeed \newline
+\textbf{Final Report:} everyone \newline
+\textbf{Final Project:} everyone
 
-\bibliographystyle{ieeetr}
-\bibliography{bib.bib}
+
+%\bibliographystyle{ieeetr}
+%\bibliography{bib.bib}
 \end{document}
