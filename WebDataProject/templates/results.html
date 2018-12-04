@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="{{ url_for('static',filename='styles/main.css') }}">
+	<title>Welcome to the sample!!</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<!-- TOP BAR NAVIGATION -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Team One</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="#">Home</a></li>
+			</ul>
+			<form class="navbar-form navbar-right" method="get" action="{{ url_for('results') }}">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="Movie:" name="searchterm">
+					<input type="hidden" class="form-control" name="pageNum" value=1>
+				</div>
+				<button type="submit" class="btn btn-default">Submit</button>
+			</form>
+		</div>
+	</div>
+</nav>
+
+<body>
+	<h2>
+		<div id='blackText'>You</div>
+		<div class='blueText'>searched</div> for: {{query}}
+	</h2>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th scope="col">Name</th>
+				<th scope="col">Genre</th>
+				<th scope="col">Year of Release</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for i, n, de, g, d, rating, url, votes in results %}
+			<tr data-toggle="modal" data-id={{i}} data-name='{{n}}' data-desc='{{de}}' data-genre='{{g}}' data-date='{{d}}' data-rating='{{rating}}' data-url='{{url}}' data-votes='{{votes}}' data-target="#exampleModal" onclick='clickRow({{i}})' id="tableRow{{i}}">
+				<td>{{n}}</td>
+				<td>{{g}}</td>
+				<td>{{d}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<button type="button" class="btn btn-outline-dark" onclick="goBack()">Go Back</button>
+
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Movie</h5>
+				</div>
+				<div class="modal-body">
+					<table class="table">
+						<tr>
+							<th scope="col">Name</th>
+							<th scope="col">Description</th>
+							<th scope="col">Genre</th>
+							<th scope="col">Date</th>
+							<th scope="col">Rating</th>
+							<th scope="col">Url</th>
+							<th scope="col">Votes</th>
+						</tr>
+						<tr>
+							<td id="movieName"></td>
+							<td id="movieDesc"></td>
+							<td id="movieGenre"></td>
+							<td id="movieDate"></td>
+							<td id="movieRating"></td>
+							<td id="movieUrl"></td>
+							<td id="movieVotes"></td>
+						</tr>
+					</table>
+				</div>
+
+				<form>
+					<input type="text" placeholder="0-10" name="rating" id="ratingBox" value="">
+					<input type="hidden" value="" name="id" id="movieID">
+					<button type="button" class="btn btn-primary"  onclick="voteSubmit($('#movieID').attr('value'))">Save changes</button>
+				</form>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button type="button" class="btn btn-outline-dark" onclick="goBack()">Go Back</button>
+	<a href = "" id ="nextButton">Next Page</a>
+
+	<form action="{{ url_for('index') }}" method="post">
+		<input type="submit" value="Return">
+	</form>
+
+
+	<script>
+		function voteSubmit(movieID) {
+			var oldVotes = parseInt($("#tableRow" + movieID).data("votes").replace(/,/g, ''));
+			var oldRating = parseFloat($("#tableRow" + movieID).data("rating"));
+			var newVotes = Math.floor(1.5 * oldVotes);
+			var userRating = document.querySelector('#ratingBox').value;
+			var newRating = ((oldVotes * oldRating + userRating * (oldVotes * 0.5)) / newVotes).toFixed(1);
+			$('#movieRating').html(newRating);
+			$('#movieVotes').html(newVotes);
+			$('#tableRow'+movieID).attr('data-rating',newRating);
+			$('#tableRow'+movieID).attr('data-votes',newVotes);
+			$.ajax({
+				url: '/update/',
+				data: 'url='+$("#tableRow" + movieID).data("url")+'&votes='+newVotes+'&rating='+newRating,
+				type: 'POST',
+				success: function(response) {
+					console.log(response);
+				},
+				error: function(error) {
+					console.log(error);
+				}
+        	});
+			
+		}
+	</script>
+
+	<script>
+		function goBack() {
+			window.history.back();
+		}
+	</script>
+	
+	<script>
+		var urlString = window.location.href;
+		var url = new URL(urlString);
+		var pageNum = url.searchParams.get("pageNum");
+		console.log(typeof(pageNum));
+		var query = url.searchParams.get("searchterm");
+		$('#nextButton').attr('href', 'http://localhost:5000/results/?searchterm='+query+'&pageNum='+ (parseInt(pageNum)+1));
+		console.log(pageNum);
+	</script>
+	
+	<script>
+		$('#exampleModal').on('show.bs.modal', function (e) {
+			var movie = $(e.relatedTarget).attr('data-id');
+			$(this).find('.table table-hover').text();
+		});
+	</script>
+
+	<script data-id="123">
+		function clickRow(id) {
+			// console.log(id);
+			//console.log($("#tableRow" + id).data("id"));
+			$('#movieID').html($("#tableRow" + id).data("id"));
+			$('#movieID').attr('value',$("#tableRow" + id).data("id"));
+			$('#movieName').html($("#tableRow" + id).data("name"));
+			$('#movieDesc').html($("#tableRow" + id).data("desc"));
+			$('#movieGenre').html($("#tableRow" + id).data("genre"));
+			$('#movieDate').html($("#tableRow" + id).data("date"));
+			$('#movieRating').html($("#tableRow" + id).attr("data-rating"));
+			$('#movieUrl').html('<a href="'+$("#tableRow" + id).data("url")+'">IMDB</a>');
+			$('#movieVotes').html($("#tableRow" + id).attr("data-votes"));
+		}
+	</script>
+	
+	<!-- Star Rating -->
+	<!-- <script>
+		$(".alert").addClass("in").fadeOut(3500);
+		// starrr plugin (https://github.com/dobtco/starrr)
+		var __slice = [].slice;
+
+		(function ($, window) {
+			var Starrr;
+
+			Starrr = (function () {
+				Starrr.prototype.defaults = {
+					rating: void 0,
+					numStars: 10,
+					change: function (e, value) { }
+				};
+
+				function Starrr($el, options) {
+					var i, _, _ref,
+						_this = this;
+
+					this.options = $.extend({}, this.defaults, options);
+					this.$el = $el;
+					_ref = this.defaults;
+					for (i in _ref) {
+						_ = _ref[i];
+						if (this.$el.data(i) != null) {
+							this.options[i] = this.$el.data(i);
+						}
+					}
+					this.createStars();
+					this.syncRating();
+					this.$el.on('mouseover.starrr', 'span', function (e) {
+						return _this.syncRating(_this.$el.find('span').index(e.currentTarget) + 1);
+					});
+					this.$el.on('mouseout.starrr', function () {
+						return _this.syncRating();
+					});
+					this.$el.on('click.starrr', 'span', function (e) {
+						return _this.setRating(_this.$el.find('span').index(e.currentTarget) + 1);
+					});
+					this.$el.on('starrr:change', this.options.change);
+				}
+
+				Starrr.prototype.createStars = function () {
+					var _i, _ref, _results;
+
+					_results = [];
+					for (_i = 1, _ref = this.options.numStars; 1 <= _ref ? _i <= _ref : _i >= _ref; 1 <= _ref ? _i++ : _i--) {
+						_results.push(this.$el.append("<span class='glyphicon .glyphicon-star-empty'></span>"));
+					}
+					return _results;
+				};
+
+				Starrr.prototype.setRating = function (rating) {
+					if (this.options.rating === rating) {
+						rating = void 0;
+					}
+					this.options.rating = rating;
+					this.syncRating();
+					return this.$el.trigger('starrr:change', rating);
+				};
+
+				Starrr.prototype.syncRating = function (rating) {
+					var i, _i, _j, _ref;
+
+					rating || (rating = this.options.rating);
+					if (rating) {
+						for (i = _i = 0, _ref = rating - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+							this.$el.find('span').eq(i).removeClass('glyphicon-star-empty').addClass('glyphicon-star');
+						}
+					}
+					if (rating && rating < 10) {
+						for (i = _j = rating; rating <= 9 ? _j <= 9 : _j >= 9; i = rating <= 9 ? ++_j : --_j) {
+							this.$el.find('span').eq(i).removeClass('glyphicon-star').addClass('glyphicon-star-empty');
+						}
+					}
+					if (!rating) {
+						return this.$el.find('span').removeClass('glyphicon-star').addClass('glyphicon-star-empty');
+					}
+				};
+
+				return Starrr;
+
+			})();
+			return $.fn.extend({
+				starrr: function () {
+					var args, option;
+
+					option = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+					return this.each(function () {
+						var data;
+
+						data = $(this).data('star-rating');
+						if (!data) {
+							$(this).data('star-rating', (data = new Starrr($(this), option)));
+						}
+						if (typeof option === 'string') {
+							return data[option].apply(data, args);
+						}
+					});
+				}
+			});
+		})(window.jQuery, window);
+
+		$(function () {
+			return $(".starrr").starrr();
+		});
+
+			// $(document).ready(function () {
+
+			// 	$('#stars').on('starrr:change', function (e, value) {
+			// 		$('#count').html(value);
+			// 		$('.alert').removeClass('hide').show().delay(1000).addClass("in").fadeOut(3500);
+			// 	});
+
+			// });
+	</script> -->
+
+</body>
+
+</html>
