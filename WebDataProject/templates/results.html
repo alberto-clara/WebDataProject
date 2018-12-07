@@ -19,11 +19,11 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#">Team One</a>
+			<a class="navbar-brand" href="/">Team One</a>
 		</div>
 		<div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Home</a></li>
+				<li class="active"><a href="/">Home</a></li>
 			</ul>
 			<form class="navbar-form navbar-right" method="get" action="{{ url_for('results') }}">
 				<div class="form-group">
@@ -51,7 +51,9 @@
 		</thead>
 		<tbody>
 			{% for i, n, de, g, d, rating, url, votes in results %}
-			<tr data-toggle="modal" data-id={{i}} data-name='{{n}}' data-desc='{{de}}' data-genre='{{g}}' data-date='{{d}}' data-rating='{{rating}}' data-url='{{url}}' data-votes='{{votes}}' data-target="#exampleModal" onclick='clickRow({{i}})' id="tableRow{{i}}">
+			<tr data-toggle="modal" data-id={{i}} data-name='{{n}}' data-desc='{{de}}' data-genre='{{g}}' data-date='{{d}}'
+			 data-rating='{{rating}}' data-url='{{url}}' data-votes='{{votes}}' data-target="#exampleModal" onclick='clickRow({{i}})'
+			 id="tableRow{{i}}">
 				<td>{{n}}</td>
 				<td>{{g}}</td>
 				<td>{{d}}</td>
@@ -91,11 +93,13 @@
 						</tr>
 					</table>
 				</div>
-
-				<form>
+				<form onsubmit="voteSubmit($('#movieID').attr('value'))">
 					<input type="text" placeholder="0-10" name="rating" id="ratingBox" value="">
 					<input type="hidden" value="" name="id" id="movieID">
-					<button type="button" class="btn btn-primary"  onclick="voteSubmit($('#movieID').attr('value'))">Save changes</button>
+					<input type="hidden" value="" name="pageNum" id="hiddenNum">
+					<input type="hidden" value="" name="searchterm" id="hiddenQ">
+					<button type="button" class="btn btn-primary" onclick="voteSubmit($('#movieID').attr('value'))">Save changes</button>
+					<p id="error" style="color:red; visibility:hidden"> Rate from 1-10</p>
 				</form>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -105,7 +109,8 @@
 	</div>
 
 	<button type="button" class="btn btn-outline-dark" onclick="goBack()">Go Back</button>
-	<a href = "" id ="nextButton">Next Page</a>
+
+	<a href="" id="nextButton">Next Page</a>
 
 	<form action="{{ url_for('index') }}" method="post">
 		<input type="submit" value="Return">
@@ -114,27 +119,42 @@
 
 	<script>
 		function voteSubmit(movieID) {
-			var oldVotes = parseInt($("#tableRow" + movieID).data("votes").replace(/,/g, ''));
+			console.log($("#tableRow" + movieID).data("votes"));
+			var oldVotes = $("#tableRow" + movieID).data("votes");
 			var oldRating = parseFloat($("#tableRow" + movieID).data("rating"));
-			var newVotes = Math.floor(1.5 * oldVotes);
 			var userRating = document.querySelector('#ratingBox').value;
-			var newRating = ((oldVotes * oldRating + userRating * (oldVotes * 0.5)) / newVotes).toFixed(1);
+			console.log(userRating);
+			if (!$.isNumeric(userRating) || userRating < 1 || userRating > 10){
+				$('#error').css('visibility', 'visible');
+				return;
+			}
+			$('#error').css('visibility', 'hidden');
+			if (oldVotes > 0) {
+				var newVotes = Math.floor(1.5 * oldVotes);
+				var newRating = ((oldVotes * oldRating + userRating * (oldVotes * 0.5)) / newVotes).toFixed(1);
+			}
+			else {
+				var newVotes = 10;
+				var newRating = userRating;
+			}
 			$('#movieRating').html(newRating);
 			$('#movieVotes').html(newVotes);
-			$('#tableRow'+movieID).attr('data-rating',newRating);
-			$('#tableRow'+movieID).attr('data-votes',newVotes);
+			$('#tableRow' + movieID).attr('data-rating', newRating);
+			$('#tableRow' + movieID).attr('data-votes', newVotes);
+			console.log('name=' + $("#tableRow" + movieID).data("name")+'&desc=' + $("#tableRow" + movieID).data("desc")+'&genre=' + $("#tableRow" + movieID).data("genre") +'&date='+ $("#tableRow" + movieID).data("date") + '&rating=' + newRating +'&url='+ $("#tableRow" + movieID).data("url") + '&votes=' + newVotes);
+
 			$.ajax({
 				url: '/update/',
-				data: 'url='+$("#tableRow" + movieID).data("url")+'&votes='+newVotes+'&rating='+newRating,
+				data: 'name=' + $("#tableRow" + movieID).data("name")+'&desc=' + $("#tableRow" + movieID).data("desc")+'&genre=' + $("#tableRow" + movieID).data("genre") +'&date='+ $("#tableRow" + movieID).data("date") + '&rating=' + newRating +'&url='+ $("#tableRow" + movieID).data("url") + '&votes=' + newVotes ,
 				type: 'POST',
-				success: function(response) {
+				success: function (response) {
 					console.log(response);
 				},
-				error: function(error) {
+				error: function (error) {
 					console.log(error);
 				}
-        	});
-			
+			});
+
 		}
 	</script>
 
@@ -143,17 +163,19 @@
 			window.history.back();
 		}
 	</script>
-	
+
 	<script>
 		var urlString = window.location.href;
 		var url = new URL(urlString);
 		var pageNum = url.searchParams.get("pageNum");
-		console.log(typeof(pageNum));
+		console.log(typeof (pageNum));
 		var query = url.searchParams.get("searchterm");
-		$('#nextButton').attr('href', 'http://localhost:5000/results/?searchterm='+query+'&pageNum='+ (parseInt(pageNum)+1));
+		$('#hiddenNum').attr('value', pageNum);
+		$('#hiddenQ').attr('value', query);
+		$('#nextButton').attr('href', 'http://localhost:5000/results/?searchterm=' + query + '&pageNum=' + (parseInt(pageNum) + 1));
 		console.log(pageNum);
 	</script>
-	
+
 	<script>
 		$('#exampleModal').on('show.bs.modal', function (e) {
 			var movie = $(e.relatedTarget).attr('data-id');
@@ -164,17 +186,17 @@
 	<script data-id="123">
 		function clickRow(id) {
 			$('#movieID').html($("#tableRow" + id).data("id"));
-			$('#movieID').attr('value',$("#tableRow" + id).data("id"));
+			$('#movieID').attr('value', $("#tableRow" + id).data("id"));
 			$('#movieName').html($("#tableRow" + id).data("name"));
 			$('#movieDesc').html($("#tableRow" + id).data("desc"));
 			$('#movieGenre').html($("#tableRow" + id).data("genre"));
 			$('#movieDate').html($("#tableRow" + id).data("date"));
 			$('#movieRating').html($("#tableRow" + id).attr("data-rating"));
-			$('#movieUrl').html('<a href="'+$("#tableRow" + id).data("url")+'">IMDB</a>');
+			$('#movieUrl').html('<a href="' + $("#tableRow" + id).data("url") + '">IMDB</a>');
 			$('#movieVotes').html($("#tableRow" + id).attr("data-votes"));
 		}
 	</script>
-	
+
 </body>
 
 </html>
